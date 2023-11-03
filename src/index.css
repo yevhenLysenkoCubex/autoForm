@@ -22,8 +22,8 @@ main {
 
 form {
   margin: 0 auto;
-  height: 40%;
-  width: 45%;
+  height: 300px;
+  width: 400px;
   border: 1px solid red;
   border-radius: 8px;
   padding: 12px;
