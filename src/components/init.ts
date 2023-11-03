@@ -11,23 +11,41 @@ export const getInitialFormValues = (forms: FormTypes[]) => {
   forms.forEach((form) => {
     switch (form.type) {
       case "number":
-        if (typeof form.default_value === "number") {
-          initialFormValues.number = form.default_value;
+        if (
+          form.default_value &&
+          (typeof form.default_value === "number" ||
+            typeof form.default_value === "string")
+        ) {
+          initialFormValues.number = Number(form.default_value);
         }
         break;
       case "text":
-        if (typeof form.default_value === "string") {
-          initialFormValues.text = form.default_value;
+        if (
+          form.default_value &&
+          (typeof form.default_value === "string" ||
+            typeof form.default_value === "number")
+        ) {
+          initialFormValues.text = String(form.default_value);
         }
         break;
       case "dropdown":
-        if (typeof form.default_value === "string") {
-          initialFormValues.select = form.default_value;
+        if (
+          form.default_value &&
+          (typeof form.default_value === "string" ||
+            typeof form.default_value === "number")
+        ) {
+          initialFormValues.select = String(form.default_value);
+        } else if (Array.isArray(form.options) && form.options.length > 0) {
+          initialFormValues.select = String(form.options[0]);
         }
         break;
       case "textarea":
-        if (typeof form.default_value === "string") {
-          initialFormValues.textArea = form.default_value;
+        if (
+          form.default_value &&
+          (typeof form.default_value === "string" ||
+            typeof form.default_value === "number")
+        ) {
+          initialFormValues.textArea = String(form.default_value);
         }
         break;
       default:

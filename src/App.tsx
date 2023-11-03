@@ -14,10 +14,11 @@ function App() {
   const forms = [
     {
       type: "text",
+      default_value: "Def",
     },
     {
       type: "textarea",
-      default_value: "Hello",
+      default_value: "textArea tdef",
     },
     {
       type: "dropdown",
@@ -35,7 +36,6 @@ function App() {
   const forms1 = [
     {
       type: "text",
-      default_value: "TExt Default Value",
     },
     {
       type: "textarea",

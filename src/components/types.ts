@@ -12,3 +12,10 @@ export interface FormTypes {
   options?: string[] | number[];
   type: "text" | "textarea" | "dropdown" | "number";
 }
+
+export type FormDataTypes = {
+  number?: number;
+  text?: string;
+  select?: string;
+  textArea?: string;
+};

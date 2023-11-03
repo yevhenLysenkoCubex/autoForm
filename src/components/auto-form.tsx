@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { AutoFormTypes, FormTypes } from "./types";
+import type { AutoFormTypes, FormTypes, FormDataTypes } from "./types";
 import { getInitialFormValues } from "./init";
 
 export default function AutoForm({ forms, handleSubmit }: AutoFormTypes) {
@@ -12,17 +12,80 @@ export default function AutoForm({ forms, handleSubmit }: AutoFormTypes) {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = {
-      number,
-      textArea,
-      text,
-      select,
-    };
+    const formData: FormDataTypes = {};
+
+    if (forms.find((form) => form.type === "number")) {
+      formData["number"] = number;
+    }
+
+    if (forms.find((form) => form.type === "text")) {
+      formData["text"] = text;
+    }
+
+    if (forms.find((form) => form.type === "dropdown")) {
+      formData["select"] = select;
+    }
+
+    if (forms.find((form) => form.type === "textarea")) {
+      formData["textArea"] = textArea;
+    }
     handleSubmit(formData);
   };
 
-  function renderFormField(form: FormTypes) {
-    const { type, default_value, options } = form;
+  const validateRegex = (value: string, regex: string): boolean => {
+    try {
+      const pattern = new RegExp(regex);
+      return pattern.test(value);
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const handleValueChange = (
+    value: string,
+    type: string,
+    regex?: string
+  ): string | number => {
+    if (type === "text" || type === "textarea") {
+      if (!regex || validateRegex(value, regex)) {
+        return value;
+      }
+    } else if (type === "number") {
+      const numericValue = parseFloat(value);
+      if (
+        !isNaN(numericValue) &&
+        (!regex || validateRegex(numericValue.toString(), regex))
+      ) {
+        return numericValue;
+      }
+    }
+    return type === "text" || type === "textarea" ? "" : 0;
+  };
+
+  function renderFormField(form: FormTypes): JSX.Element | null {
+    const { type, default_value, options, validation } = form;
+
+    if (
+      type !== "number" &&
+      type !== "text" &&
+      type !== "textarea" &&
+      type !== "dropdown"
+    ) {
+      return null;
+    }
+
+    const handleInputChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+      const newValue = handleValueChange(e.target.value, type, validation);
+      if (type === "number") {
+        setNumber(Number(newValue));
+      } else if (type === "textarea") {
+        setTextArea(String(newValue));
+      } else {
+        setText(String(newValue));
+      }
+    };
 
     if (type === "dropdown") {
       return (
@@ -56,7 +119,7 @@ export default function AutoForm({ forms, handleSubmit }: AutoFormTypes) {
           value={number}
           min={form?.min_value}
           max={form?.max_value}
-          onChange={(e) => setNumber(Number(e.target.value))}
+          onChange={(e) => handleInputChange(e)}
         />
       );
     }
@@ -64,12 +127,9 @@ export default function AutoForm({ forms, handleSubmit }: AutoFormTypes) {
     if (type === "textarea") {
       const textareaProps = {
         placeholder: "textarea",
-        value:
-          typeof default_value === "string" || typeof default_value === "number"
-            ? default_value
-            : textArea,
+        value: textArea,
         onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-          setTextArea(e.target.value),
+          handleInputChange(e),
       };
 
       return <textarea {...textareaProps} />;
@@ -77,12 +137,9 @@ export default function AutoForm({ forms, handleSubmit }: AutoFormTypes) {
 
     const inputProps = {
       placeholder: type,
-      value:
-        typeof default_value === "string" || typeof default_value === "number"
-          ? default_value
-          : text,
+      value: text,
       onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-        setText(e.target.value),
+        handleInputChange(e),
     };
 
     return <input type="text" {...inputProps} />;
